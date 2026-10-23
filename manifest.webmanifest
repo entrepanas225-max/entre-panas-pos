@@ -1,0 +1,20 @@
+{
+  "name": "Entre Panas · POS",
+  "short_name": "Entre Panas",
+  "description": "Punto de venta para pizzería y comidas rápidas: mesas, domicilios, cocina y caja.",
+  "lang": "es-CO",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1f5f9",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "assets/icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
