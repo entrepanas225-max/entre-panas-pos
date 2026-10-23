@@ -23,15 +23,91 @@
   });
   const minutosDesde = ts => Math.max(0, Math.floor((Date.now() - ts) / 60000));
 
-  /* ------------------------------------------------------------- catálogo */
-  const MENU = [
-    { id: 'p1', nombre: 'Pizza Jamón y Queso', precio: 18000, cat: 'comida' },
-    { id: 'p2', nombre: 'Pizza Pepperoni', precio: 20000, cat: 'comida' },
-    { id: 'p3', nombre: 'Hamburguesa Especial', precio: 15000, cat: 'comida' },
-    { id: 'p4', nombre: 'Perro Caliente Especial', precio: 12000, cat: 'comida' },
-    { id: 'b1', nombre: 'Gaseosa 350 ml', precio: 3500, cat: 'bebida', stock: 24 },
-    { id: 'b2', nombre: 'Jugo Natural (Agua/Leche)', precio: 5000, cat: 'bebida', stock: 15 }
+  /* ------------------------------------------------------------- catálogo
+     Menú real de Entre Panas. Precios en pesos colombianos (COP).
+     Las pizzas se venden por sabor + tamaño; "La Entre Panas" pide los 5 ingredientes. */
+  const CATEGORIAS = [
+    { id: 'hamburguesas', nombre: 'Hamburguesas' },
+    { id: 'perros', nombre: 'Perros' },
+    { id: 'picadas', nombre: 'Picadas' },
+    { id: 'asados', nombre: 'Asados' },
+    { id: 'pizzas', nombre: 'Pizzas' },
+    { id: 'bebidas', nombre: 'Bebidas' },
+    { id: 'promos', nombre: 'Promos' }
   ];
+
+  const TALLAS_PIZZA = [
+    { id: 'peq', nombre: 'Pequeña 24 cm', precio: 25000 },
+    { id: 'med', nombre: 'Mediana 35 cm', precio: 35000 },
+    { id: 'gra', nombre: 'Grande 40 cm', precio: 45000 }
+  ];
+
+  const SABORES_PIZZA = [
+    { id: 'pizza-light', nombre: 'Pizza La Chica Light', desc: 'Queso, salsa, maíz, pimentón, champiñones y cebolla' },
+    { id: 'pizza-nalgona', nombre: 'Pizza La Nalgona', desc: 'Queso, salsa, tocineta y pepperoni' },
+    { id: 'pizza-secretaria', nombre: 'Pizza La Secretaria', desc: 'Queso, salsa, carne molida, tocineta y pimentón' },
+    { id: 'pizza-junior', nombre: 'Pizza La Junior', desc: 'Queso, jamón y tocineta' },
+    { id: 'pizza-chama', nombre: 'Pizza La Chama Caprichosa', desc: 'Queso, salsa, jamón, pepperoni y pimentón' },
+    { id: 'pizza-entre-panas', nombre: 'Pizza La Entre Panas', desc: 'A tu gusto: escoge 5 ingredientes (incluye queso y salsa)', pideNota: true }
+  ];
+
+  const MENU = [
+    /* --- Hamburguesas (todas llevan papas a la francesa) --- */
+    { id: 'ham-clasica', nombre: 'Hamburguesa La Clásica', precio: 20000, cat: 'hamburguesas',
+      desc: 'Carne de res, pollo o cerdo, queso mozzarella, tocineta, papa ripio, tomate, cebolla, lechuga y salsas' },
+    { id: 'ham-doble', nombre: 'Hamburguesa Doble Carne', precio: 25000, cat: 'hamburguesas',
+      desc: 'Carne de res y pollo, tocineta, queso mozzarella, papa ripio, tomate, cebolla, lechuga y salsas' },
+    { id: 'ham-glotona', nombre: 'Hamburguesa La Glotona', precio: 30000, cat: 'hamburguesas',
+      desc: 'Carne de res, pollo y cerdo, tocineta, queso mozzarella, papa ripio, tomate, cebolla, lechuga y salsas' },
+
+    /* --- Perros --- */
+    { id: 'perro-super', nombre: 'Perro Super', precio: 12000, cat: 'perros',
+      desc: 'Salchicha super, papa ripio, queso mozzarella y salsas' },
+    { id: 'perro-chori', nombre: 'Perro Chori', precio: 15000, cat: 'perros',
+      desc: 'Chorizo, papa ripio, queso mozzarella y salsas' },
+    { id: 'perro-suizo', nombre: 'Perro Suizo', precio: 17000, cat: 'perros',
+      desc: 'Salchicha suiza, papa ripio, queso mozzarella y salsas' },
+    { id: 'perro-salvaje', nombre: 'Perro Salvaje', precio: 20000, cat: 'perros',
+      desc: 'Salchicha, pollo y cerdo, papa ripio, queso mozzarella, maíz y salsas' },
+
+    /* --- Picadas --- */
+    { id: 'pic-salchipapa', nombre: 'Salchipapa', precio: 15000, cat: 'picadas',
+      desc: 'Papá francesa, salchicha, chorizo, butifarra, maíz, papa ripio, queso y salsas' },
+    { id: 'pic-patacon', nombre: 'Picada de Patacón', precio: 20000, cat: 'picadas',
+      desc: 'Patacón con pollo, cerdo, chorizo, butifarra, maíz, papa ripio, queso y salsas' },
+    { id: 'pic-francesa', nombre: 'Picada Francesa', precio: 20000, cat: 'picadas',
+      desc: 'Papá francesa, pollo, cerdo, chorizo, butifarra, maíz, papa ripio, queso y salsas' },
+    { id: 'pic-2personas', nombre: 'Picada para 2 Personas', precio: 30000, cat: 'picadas',
+      desc: 'Picada mixta con patacón o papa, pollo, cerdo, chorizo, butifarra, maíz, papa ripio, queso y salsas' },
+    { id: 'pic-entrepana', nombre: 'Picada Entre Panas', precio: 40000, cat: 'picadas',
+      desc: 'Papá francesa, patacón, pollo, cerdo, chorizo, butifarra, maíz, papa ripio, queso y salsas' },
+    { id: 'pic-familiar', nombre: 'Picada Familiar', precio: 50000, cat: 'picadas',
+      desc: 'Picada mixta con patacón o papa, pollo, cerdo, chorizo, butifarra, maíz, papa ripio, queso y salsas' },
+
+    /* --- Asados --- */
+    { id: 'asado-cerdo', nombre: 'Asado de Cerdo o Pollo', precio: 18000, cat: 'asados',
+      desc: 'Con papas a la francesa o patacón y ensalada' },
+    { id: 'asado-carne', nombre: 'Asado de Carne', precio: 25000, cat: 'asados',
+      desc: 'Punta gorda, con papas a la francesa o patacón y ensalada' },
+
+    /* --- Pizzas (precio por tamaño) --- */
+    ...SABORES_PIZZA.map(s => ({
+      id: s.id, nombre: s.nombre, desc: s.desc, cat: 'pizzas',
+      precio: TALLAS_PIZZA[0].precio, tallas: TALLAS_PIZZA, pideNota: !!s.pideNota
+    })),
+
+    /* --- Bebidas (todas frías) --- */
+    { id: 'beb-personal', nombre: 'Gaseosa Personal', precio: 4000, cat: 'bebidas' },
+    { id: 'beb-15', nombre: 'Gaseosa 1.5 L', precio: 8000, cat: 'bebidas' },
+    { id: 'beb-agua', nombre: 'Agua', precio: 3000, cat: 'bebidas' },
+
+    /* --- Promos --- */
+    { id: 'promo-clasicas', nombre: 'Promo: 2 Clásicas', precio: 35000, cat: 'promos',
+      desc: 'Lleva 2 hamburguesas clásicas' },
+    { id: 'promo-glotonas', nombre: 'Promo: 2 Glotonas', precio: 50000, cat: 'promos',
+      desc: 'Lleva 2 hamburguesas La Glotona' }
+  ];
+
   const MEDIOS = {
     efectivo: { nombre: 'Efectivo', icono: 'i-efectivo' },
     tarjeta: { nombre: 'Tarjeta', icono: 'i-tarjeta' },
@@ -40,14 +116,13 @@
   const MESAS_TOTAL = 6;
 
   /* --------------------------------------------------------------- estado */
-  const DB_KEY = 'entrePanas.v2';
-  const LEGACY_KEY = 'entrePanasData';
+  const DB_KEY = 'entrePanas.v3';   // v3: menú real, sin datos de muestra
+  const CLAVES_VIEJAS = ['entrePanas.v2', 'entrePanasData'];
 
   function porDefecto() {
     return {
-      version: 2,
+      version: 3,
       turno: { abierto: false, base: 0, inicio: null },
-      stock: Object.fromEntries(MENU.filter(p => p.stock != null).map(p => [p.id, p.stock])),
       mesas: Array.from({ length: MESAS_TOTAL }, (_, i) => ({ id: i + 1, items: [] })),
       domicilios: [],
       ventas: [],
@@ -65,11 +140,6 @@
           base: Number(crudo.turno.base) || 0,
           inicio: crudo.turno.inicio || null
         };
-      }
-      if (crudo.stock && typeof crudo.stock === 'object') {
-        Object.keys(s.stock).forEach(k => {
-          if (Number.isFinite(crudo.stock[k])) s.stock[k] = Math.max(0, crudo.stock[k]);
-        });
       }
       if (Array.isArray(crudo.mesas)) {
         s.mesas = Array.from({ length: MESAS_TOTAL }, (_, i) => {
@@ -100,7 +170,8 @@
       cant: Math.max(1, parseInt(i.cant, 10) || 1),
       enviado: !!i.enviado,
       listo: !!i.listo,
-      enviadoEn: Number(i.enviadoEn) || null
+      enviadoEn: Number(i.enviadoEn) || null,
+      nota: String(i.nota || '')
     };
   }
 
@@ -166,10 +237,10 @@
     }
     if (crudo) return normalizar(crudo, base);
 
-    try {
-      const viejo = JSON.parse(localStorage.getItem(LEGACY_KEY) || 'null');
-      if (viejo) return migrar(viejo, base);
-    } catch (e) { /* sin datos previos válidos */ }
+    // Primera carga de esta versión: se eliminan los datos de muestra de versiones anteriores.
+    CLAVES_VIEJAS.forEach(k => {
+      try { localStorage.removeItem(k); } catch (e) { /* sin acceso */ }
+    });
 
     return base;
   }
@@ -207,20 +278,6 @@
       lista.push({ tipo: 'domicilio', id: d.id, orden: d, titulo: d.cliente });
     });
     return lista;
-  }
-
-  /* Stock disponible = stock físico − unidades reservadas en pedidos abiertos. */
-  function reservado(prodId) {
-    let n = 0;
-    ordenesAbiertas().forEach(({ orden }) => orden.items.forEach(i => {
-      if (i.prodId === prodId) n += i.cant;
-    }));
-    return n;
-  }
-  function disponible(prodId) {
-    const fisico = estado.stock[prodId];
-    if (fisico == null) return Infinity;
-    return Math.max(0, fisico - reservado(prodId));
   }
 
   /* --------------------------------------------------------------- avisos */
@@ -275,6 +332,7 @@
     $('#modalPanel').className = $('#modalPanel').className.replace(/\bmax-w-\w+/g, 'max-w-lg');
     if (ancho) $('#modalPanel').classList.add(ancho);
     $('#modalCuerpo').scrollTop = 0;
+    if (modal.tipo === 'orden') pintarGridProductos();
   }
 
   /* ============================================================ RENDER UI */
@@ -400,6 +458,7 @@
                 <li class="flex items-center justify-between gap-2 px-3 py-2">
                   <span class="text-sm text-slate-700 min-w-0">
                     <b class="text-red-600">${i.cant}×</b> <span class="truncate">${esc(i.nombre)}</span>
+                    ${i.nota ? `<span class="block text-[11px] text-amber-700 bg-amber-50 rounded px-1.5 py-0.5 mt-1">Nota: ${esc(i.nota)}</span>` : ''}
                   </span>
                   <button data-accion="listo" data-tipo="${tipo}" data-id="${esc(id)}" data-idx="${idx}"
                     class="shrink-0 text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition active:scale-95">
@@ -514,29 +573,71 @@
   /* ============================================================== MODALES */
 
   /* --- 1. Orden (mesa o domicilio) --- */
+  const productosDe = (catId) => MENU.filter(p => p.cat === catId);
+
+  function precioTexto(p) {
+    if (p.tallas) {
+      const menor = Math.min(...p.tallas.map(t => t.precio));
+      return 'desde ' + fmt(menor);
+    }
+    return fmt(p.precio);
+  }
+
+  function tarjetaProducto(p) {
+    return `
+      <button data-accion="${p.tallas ? 'elegir-producto' : 'agregar'}" data-prod="${p.id}"
+        class="p-2.5 text-left rounded-lg border border-slate-200 bg-white hover:bg-red-50 hover:border-red-300 active:scale-[.98] transition flex items-start justify-between gap-1">
+        <span class="min-w-0">
+          <span class="block text-[12px] font-bold text-slate-700 leading-tight">${esc(p.nombre)}</span>
+          ${p.desc ? `<span class="block text-[10px] text-slate-400 leading-tight mt-0.5 line-clamp-2">${esc(p.desc)}</span>` : ''}
+          <span class="block text-[11px] font-semibold text-red-600 tabular-nums mt-1">${precioTexto(p)}</span>
+        </span>
+        <svg class="h-4 w-4 ico text-red-500 shrink-0 mt-0.5"><use href="#i-mas"/></svg>
+      </button>`;
+  }
+
+  function pintarGridProductos() {
+    const cont = $('#gridProductos');
+    if (!cont || !modal || modal.tipo !== 'orden') return;
+    const busqueda = (modal.datos.busqueda || '').trim().toLowerCase();
+    const cat = modal.datos.cat || CATEGORIAS[0].id;
+
+    let lista;
+    if (busqueda) {
+      lista = MENU.filter(p =>
+        p.nombre.toLowerCase().includes(busqueda) || (p.desc || '').toLowerCase().includes(busqueda));
+    } else {
+      lista = productosDe(cat);
+    }
+
+    cont.innerHTML = lista.length
+      ? lista.map(tarjetaProducto).join('')
+      : `<p class="col-span-2 text-xs text-slate-400 text-center py-6">Sin resultados para “${esc(busqueda)}”.</p>`;
+
+    const info = $('#infoCat');
+    if (info) {
+      info.textContent = busqueda
+        ? `${lista.length} resultado(s)`
+        : (cat === 'pizzas' ? 'Elige el sabor y luego el tamaño' : '');
+    }
+  }
+
+  /* --- 1a. Pedido --- */
   vistas.orden = function () {
     const { tipo, id } = modal.datos;
     const orden = buscarOrden(tipo, id);
     if (!orden) { cerrarModal(); return { titulo: '', cuerpo: '', pie: '' }; }
 
     const titulo = tipo === 'mesa' ? `Mesa ${id}` : orden.cliente;
+    if (!modal.datos.cat) modal.datos.cat = CATEGORIAS[0].id;
 
-    const botonProducto = p => {
-      const disp = disponible(p.id);
-      const agotado = disp <= 0;
-      return `
-        <button data-accion="agregar" data-prod="${p.id}" ${agotado ? 'disabled' : ''}
-          class="p-2 text-left rounded-lg border transition flex items-start justify-between gap-1
-          ${agotado ? 'bg-slate-50 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:bg-red-50 hover:border-red-300 active:scale-[.98]'}">
-          <span class="min-w-0">
-            <span class="block text-[12px] font-bold text-slate-700 leading-tight">${esc(p.nombre)}</span>
-            <span class="block text-[11px] text-slate-500 tabular-nums">${fmt(p.precio)}</span>
-            ${p.stock != null ? `<span class="block text-[10px] ${disp > 0 ? 'text-slate-400' : 'text-red-500 font-bold'}">
-              ${disp > 0 ? disp + ' disponibles' : 'agotado'}</span>` : ''}
-          </span>
-          <svg class="h-4 w-4 ico text-red-500 shrink-0 mt-0.5"><use href="#i-mas"/></svg>
-        </button>`;
-    };
+    const chips = CATEGORIAS.map(c => `
+      <button data-accion="categoria" data-cat="${c.id}"
+        class="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition
+        ${(modal.datos.cat === c.id && !(modal.datos.busqueda || '').trim())
+          ? 'bg-red-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+        ${c.nombre}
+      </button>`).join('');
 
     const cuerpo = `
       ${tipo === 'domicilio' ? `
@@ -545,15 +646,17 @@
           <span>${esc(orden.direccion || 'Sin dirección')}${orden.telefono ? ' · ' + esc(orden.telefono) : ''}</span>
         </div>` : ''}
 
-      <h4 class="font-bold text-[11px] uppercase tracking-wider text-slate-400 mb-2">Comidas rápidas &amp; pizzas</h4>
-      <div class="grid grid-cols-2 gap-2 mb-4">
-        ${MENU.filter(p => p.cat === 'comida').map(botonProducto).join('')}
+      <div class="relative mb-2">
+        <input id="buscarProducto" type="search" inputmode="search" placeholder="Buscar en el menú…"
+          value="${esc(modal.datos.busqueda || '')}" autocomplete="off"
+          class="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400">
+        <svg class="h-4 w-4 ico text-slate-400 absolute left-2.5 top-2.5 pointer-events-none"><use href="#i-lista"/></svg>
       </div>
 
-      <h4 class="font-bold text-[11px] uppercase tracking-wider text-slate-400 mb-2">Bebidas</h4>
-      <div class="grid grid-cols-2 gap-2 mb-4">
-        ${MENU.filter(p => p.cat === 'bebida').map(botonProducto).join('')}
-      </div>
+      <div class="flex flex-wrap gap-1.5 pb-2 mb-1">${chips}</div>
+      <p id="infoCat" class="text-[10px] uppercase tracking-wide text-slate-400 mb-2"></p>
+
+      <div id="gridProductos" class="grid grid-cols-2 gap-2 mb-4"></div>
 
       <div class="border-t border-slate-200 pt-3">
         <h4 class="font-bold text-sm text-slate-700 mb-2">Resumen del pedido</h4>
@@ -561,27 +664,31 @@
           const sub = item.precio * item.cant;
           const bloqueado = item.enviado;
           return `
-            <div class="flex items-center justify-between gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
-              <div class="min-w-0">
-                <p class="text-[13px] font-medium text-slate-700 truncate">${esc(item.nombre)}</p>
-                <p class="text-[10px] ${item.listo ? 'text-emerald-600' : item.enviado ? 'text-sky-600' : 'text-amber-600'} font-semibold">
-                  ${item.listo ? 'listo · en mesa' : item.enviado ? 'en cocina' : 'sin enviar'}
-                </p>
+            <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+              <div class="flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="text-[13px] font-medium text-slate-700 truncate">${esc(item.nombre)}</p>
+                  <p class="text-[10px] ${item.listo ? 'text-emerald-600' : item.enviado ? 'text-sky-600' : 'text-amber-600'} font-semibold">
+                    ${item.listo ? 'listo · en mesa' : item.enviado ? 'en cocina' : 'sin enviar'}
+                  </p>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  ${bloqueado ? `<span class="text-xs text-slate-400 tabular-nums px-1">×${item.cant}</span>` : `
+                    <button data-accion="menos" data-idx="${idx}" class="h-6 w-6 grid place-items-center rounded-md bg-white ring-1 ring-slate-300 text-slate-600 active:scale-90" aria-label="Quitar una unidad">
+                      <svg class="h-3 w-3 ico"><use href="#i-menos"/></svg>
+                    </button>
+                    <span class="text-xs font-bold w-4 text-center tabular-nums">${item.cant}</span>
+                    <button data-accion="agregar-linea" data-idx="${idx}" class="h-6 w-6 grid place-items-center rounded-md bg-white ring-1 ring-slate-300 text-slate-600 active:scale-90" aria-label="Agregar una unidad">
+                      <svg class="h-3 w-3 ico"><use href="#i-mas"/></svg>
+                    </button>
+                    <button data-accion="quitar" data-idx="${idx}" class="h-6 w-6 grid place-items-center rounded-md text-red-500 active:scale-90" aria-label="Eliminar del pedido">
+                      <svg class="h-3.5 w-3.5 ico"><use href="#i-trash"/></svg>
+                    </button>`}
+                  <span class="text-[13px] font-bold tabular-nums w-20 text-right">${fmt(sub)}</span>
+                </div>
               </div>
-              <div class="flex items-center gap-1.5 shrink-0">
-                ${bloqueado ? `<span class="text-xs text-slate-400 tabular-nums px-1">×${item.cant}</span>` : `
-                  <button data-accion="menos" data-idx="${idx}" class="h-6 w-6 grid place-items-center rounded-md bg-white ring-1 ring-slate-300 text-slate-600 active:scale-90" aria-label="Quitar una unidad">
-                    <svg class="h-3 w-3 ico"><use href="#i-menos"/></svg>
-                  </button>
-                  <span class="text-xs font-bold w-4 text-center tabular-nums">${item.cant}</span>
-                  <button data-accion="agregar-linea" data-idx="${idx}" class="h-6 w-6 grid place-items-center rounded-md bg-white ring-1 ring-slate-300 text-slate-600 active:scale-90" aria-label="Agregar una unidad">
-                    <svg class="h-3 w-3 ico"><use href="#i-mas"/></svg>
-                  </button>
-                  <button data-accion="quitar" data-idx="${idx}" class="h-6 w-6 grid place-items-center rounded-md text-red-500 active:scale-90" aria-label="Eliminar del pedido">
-                    <svg class="h-3.5 w-3.5 ico"><use href="#i-trash"/></svg>
-                  </button>`}
-                <span class="text-[13px] font-bold tabular-nums w-20 text-right">${fmt(sub)}</span>
-              </div>
+              ${item.nota ? `<p class="mt-1 text-[11px] text-slate-600 bg-white rounded border border-slate-200 px-1.5 py-1">
+                  <b class="text-slate-400">Nota:</b> ${esc(item.nota)}</p>` : ''}
             </div>`;
         }).join('')}</div>` : `<p class="text-xs text-slate-400 py-3 text-center">Aún no hay productos en este pedido.</p>`}
       </div>`;
@@ -609,6 +716,46 @@
 
     return { titulo, cuerpo, pie };
   };
+
+  /* --- 1b. Elegir tamaño (pizzas) y nota (La Entre Panas) --- */
+  vistas.producto = function () {
+    const { prodId } = modal.datos;
+    const p = MENU.find(x => x.id === prodId);
+    if (!p) { cerrarModal(); return { titulo: '', cuerpo: '', pie: '' }; }
+
+    const tallas = p.tallas || [{ id: 'unico', nombre: 'Único', precio: p.precio }];
+
+    return {
+      titulo: p.nombre,
+      cuerpo: `
+        ${p.desc ? `<p class="text-xs text-slate-500 mb-3">${esc(p.desc)}</p>` : ''}
+        ${p.pideNota ? `
+          <label class="block mb-3">
+            <span class="text-xs font-semibold text-slate-600">Ingredientes (5)</span>
+            <textarea id="notaProducto" rows="2" maxlength="120" placeholder="Ej: queso, jamón, pepperoni, maíz, pimentón"
+              class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"></textarea>
+          </label>` : ''}
+        <p class="text-xs font-semibold text-slate-600 mb-1.5">${p.tallas ? 'Tamaño' : 'Agregar'}</p>
+        <div class="space-y-2">
+          ${tallas.map(t => `
+            <button data-accion="confirmar-producto" data-talla="${t.id}"
+              class="w-full flex items-center justify-between gap-2 border-2 border-slate-200 hover:border-red-400 hover:bg-red-50 rounded-xl px-3 py-3 transition active:scale-[.99]">
+              <span class="font-bold text-slate-700 text-sm">${esc(t.nombre)}</span>
+              <span class="font-bold text-red-600 tabular-nums">${fmt(t.precio)}</span>
+            </button>`).join('')}
+        </div>`,
+      pie: `
+        <button data-accion="volver-orden" class="w-full bg-white ring-1 ring-slate-300 text-slate-600 font-bold py-2.5 rounded-lg text-sm">
+          Volver al pedido
+        </button>`
+    };
+  };
+
+  function volverAOrden() {
+    const { tipo, id, cat } = modal.datos;
+    modal = { tipo: 'orden', datos: { tipo, id, cat, busqueda: '' } };
+    pintarModal();
+  }
 
   /* --- 2. Nuevo domicilio --- */
   vistas.domicilio = function () {
@@ -714,7 +861,10 @@
         <p class="text-xs text-slate-500 mb-1">Pedido</p>
         <p class="font-bold text-slate-800 mb-3">${esc(ref)}</p>
         <div class="space-y-1 text-sm mb-3">
-          ${orden.items.map(i => `<div class="flex justify-between text-slate-600"><span>${i.cant}× ${esc(i.nombre)}</span><span class="tabular-nums">${fmt(i.precio * i.cant)}</span></div>`).join('')}
+          ${orden.items.map(i => `<div class="text-slate-600">
+            <div class="flex justify-between"><span>${i.cant}× ${esc(i.nombre)}</span><span class="tabular-nums">${fmt(i.precio * i.cant)}</span></div>
+            ${i.nota ? `<div class="text-[11px] text-slate-400 pl-3">↳ ${esc(i.nota)}</div>` : ''}
+          </div>`).join('')}
         </div>
         <div class="flex justify-between items-center border-t border-slate-200 pt-2 mb-3">
           <span class="font-bold text-slate-700">Total a pagar</span>
@@ -757,7 +907,8 @@
               <div class="flex justify-between gap-2">
                 <span class="truncate">${i.cant}× ${esc(i.nombre)}</span>
                 <span class="tabular-nums shrink-0">${fmt(i.precio * i.cant)}</span>
-              </div>`).join('')}
+              </div>
+              ${i.nota ? `<div class="text-[10px] pl-3 text-slate-500">↳ ${esc(i.nota)}</div>` : ''}`).join('')}
           </div>
           <div class="border-t border-dashed border-slate-300 pt-2 flex justify-between font-bold text-sm">
             <span>TOTAL</span><span class="tabular-nums">${fmt(venta.total)}</span>
@@ -800,24 +951,35 @@
 
   /* ============================================================= ACCIONES */
 
-  function agregarProducto(prodId) {
+  /**
+   * Agrega un producto al pedido abierto.
+   * @param {string} prodId  id del producto del menú
+   * @param {object} [opts]  { talla: 'peq|med|gra', nota: 'texto' }
+   */
+  function agregarProducto(prodId, opts = {}) {
     const { tipo, id } = modal.datos;
     const orden = buscarOrden(tipo, id);
     const prod = MENU.find(p => p.id === prodId);
     if (!orden || !prod) return;
 
-    if (disponible(prod.id) <= 0) { toast('Sin stock disponible de ' + prod.nombre, 'error'); return; }
+    const talla = prod.tallas ? prod.tallas.find(t => t.id === opts.talla) : null;
+    const precio = talla ? talla.precio : prod.precio;
+    const nombre = talla ? `${prod.nombre} · ${talla.nombre}` : prod.nombre;
+    const nota = String(opts.nota || '').trim().slice(0, 120);
 
-    // Se reutiliza la línea pendiente; si ya fue enviada a cocina, se crea una nueva.
-    const linea = orden.items.find(i => i.prodId === prod.id && !i.enviado);
+    // Se reutiliza la línea pendiente idéntica; si ya fue enviada a cocina, se crea una nueva.
+    const linea = orden.items.find(i =>
+      i.prodId === prod.id && !i.enviado && i.nombre === nombre && (i.nota || '') === nota);
+
     if (linea) linea.cant++;
     else orden.items.push({
-      prodId: prod.id, nombre: prod.nombre, precio: prod.precio,
+      prodId: prod.id, nombre, precio, nota,
       cant: 1, enviado: false, listo: false, enviadoEn: null
     });
 
     guardar();
-    pintarModal();
+    if (modal.tipo === 'producto') volverAOrden();
+    else pintarModal();
   }
 
   function enviarACocina() {
@@ -861,13 +1023,6 @@
       ref, total, medio: MEDIOS[medio] ? medio : 'efectivo'
     };
     estado.ventas.push(venta);
-
-    // Descuento de stock físico
-    items.forEach(i => {
-      if (i.prodId && estado.stock[i.prodId] != null) {
-        estado.stock[i.prodId] = Math.max(0, estado.stock[i.prodId] - i.cant);
-      }
-    });
 
     if (tipo === 'mesa') orden.items = [];
     else estado.domicilios = estado.domicilios.filter(d => d.id !== id);
@@ -919,13 +1074,35 @@
         agregarProducto(btn.dataset.prod);
         break;
 
+      case 'categoria':
+        modal.datos.cat = btn.dataset.cat;
+        modal.datos.busqueda = '';
+        pintarModal();
+        break;
+
+      case 'elegir-producto':
+        abrirModal('producto', { prodId: btn.dataset.prod, tipo: modal.datos.tipo, id: modal.datos.id });
+        modal.datos.cat = CATEGORIAS.find(c => c.id === 'pizzas')?.id || modal.datos.cat;
+        break;
+
+      case 'confirmar-producto': {
+        const p = MENU.find(x => x.id === modal.datos.prodId);
+        if (!p) break;
+        const notaEl = document.getElementById('notaProducto');
+        const nota = notaEl ? notaEl.value.trim() : '';
+        if (p.pideNota && !nota) { toast('Escribe los 5 ingredientes', 'error'); break; }
+        agregarProducto(p.id, { talla: btn.dataset.talla, nota });
+        break;
+      }
+
+      case 'volver-orden':
+        volverAOrden();
+        break;
+
       case 'agregar-linea': {
         const orden = buscarOrden(modal.datos.tipo, modal.datos.id);
         const item = orden.items[Number(btn.dataset.idx)];
-        if (item && !item.enviado) {
-          if (item.prodId && disponible(item.prodId) <= 0) { toast('Sin stock disponible', 'error'); break; }
-          item.cant++; guardar(); pintarModal();
-        }
+        if (item && !item.enviado) { item.cant++; guardar(); pintarModal(); }
         break;
       }
 
@@ -1073,6 +1250,13 @@
       const dif = contado - a.esperado;
       toast(dif === 0 ? 'Turno cerrado: la caja cuadra' : `Turno cerrado · diferencia ${fmt(dif)}`, dif === 0 ? 'ok' : 'info');
     }
+  });
+
+  /* Buscador del menú: solo repinta la cuadrícula, no pierde el foco */
+  document.addEventListener('input', e => {
+    if (e.target.id !== 'buscarProducto' || !modal || modal.tipo !== 'orden') return;
+    modal.datos.busqueda = e.target.value;
+    pintarGridProductos();
   });
 
   /* Diferencia del arqueo en vivo */
