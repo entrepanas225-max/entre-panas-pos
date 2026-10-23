@@ -1,5 +1,5 @@
 /* Service worker: cache-first para que el POS abra sin internet. */
-const CACHE = 'entre-panas-v2';
+const CACHE = 'entre-panas-v3';
 const ARCHIVOS = [
   './',
   'index.html',
