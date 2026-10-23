@@ -175,57 +175,6 @@
     };
   }
 
-  /* Migración desde el esquema antiguo (entrePanasData). */
-  function migrar(viejo, base) {
-    const s = base;
-    if (!viejo || typeof viejo !== 'object') return s;
-    if (viejo.cajaAbierta) {
-      s.turno = { abierto: true, base: Number(viejo.montoInicial) || 0, inicio: Date.now() };
-    }
-    if (Array.isArray(viejo.mesas)) {
-      viejo.mesas.forEach(m => {
-        const destino = s.mesas.find(x => x.id === Number(m.id));
-        if (!destino || !Array.isArray(m.items)) return;
-        destino.items = m.items.map(it => {
-          const delMenu = MENU.find(p => p.nombre === it.nombre || p.id === it.id);
-          return limpiarItem({
-            prodId: delMenu ? delMenu.id : null,
-            nombre: it.nombre,
-            precio: it.precio,
-            cant: it.cant,
-            enviado: true, listo: false
-          });
-        });
-      });
-    }
-    if (Array.isArray(viejo.domicilios)) {
-      viejo.domicilios.forEach((d, i) => {
-        if (!d || !d.cliente) return;
-        s.domicilios.push({
-          id: 'mig' + i,
-          cliente: String(d.cliente),
-          telefono: '',
-          direccion: String(d.direccion || ''),
-          creado: Date.now(),
-          items: [limpiarItem({
-            nombre: 'Pedido migrado', precio: Number(d.total) || 0, cant: 1,
-            enviado: true, listo: true
-          })]
-        });
-      });
-    }
-    if (Array.isArray(viejo.ventas)) {
-      viejo.ventas.forEach(v => {
-        if (!v) return;
-        s.ventas.push({
-          id: s.seq++, ts: Date.now(), tipo: 'mesa',
-          ref: 'Mesa ' + (v.mesa ?? '?'), total: Number(v.total) || 0, medio: 'efectivo'
-        });
-      });
-    }
-    return s;
-  }
-
   function cargar() {
     const base = porDefecto();
     let crudo = null;
