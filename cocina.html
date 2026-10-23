@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="description" content="Pantalla de cocina · Entre Panas: comandas en vivo, en tiempo real.">
+<title>Cocina · Entre Panas</title>
+<link rel="manifest" href="manifest-cocina.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230b1220'/%3E%3Cpath d='M12 20c3.2 0 5.4-2.2 5.4-5.2 0-3.8-3.3-5-3-8.8 0 0-2 1.2-2 3.2 0-.9-1.3-2-2-2.8C8.8 8.2 6.6 10.5 6.6 13.1 6.6 17 8.8 20 12 20Z' fill='%23fbbf24'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/estilos.css">
+<style>
+  /* ---- Pantalla de cocina: alto contraste, tipografía grande, sin adornos ---- */
+  html, body { height: 100%; }
+  body {
+    background: #0b1220; color: #e6edf7;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+  }
+  .kds-card { background:#131c2e; border:2px solid #24314b; border-radius:16px; }
+  .kds-card.nuevo { animation: pulso 1.1s ease-out 3; }
+  .kds-card.urgente { border-color:#dc2626; background:#1e1216; }
+  .kds-card.medio   { border-color:#f59e0b; }
+  .kds-item { display:flex; align-items:flex-start; gap:.6rem; }
+  .kds-check {
+    flex:none; width:2.4rem; height:2.4rem; border-radius:.7rem;
+    border:2px solid #33415c; background:#0e1727; display:grid; place-items:center;
+    font-size:1.1rem; color:#7c8ba3; cursor:pointer; transition:.12s;
+  }
+  .kds-check:hover { border-color:#22c55e; color:#22c55e; }
+  .kds-check:active { transform:scale(.92); }
+  @keyframes pulso {
+    0%   { box-shadow: 0 0 0 0 rgba(251,191,36,.75); }
+    100% { box-shadow: 0 0 0 22px rgba(251,191,36,0); }
+  }
+  .dot { width:.6rem; height:.6rem; border-radius:999px; display:inline-block; }
+  .dot.ok { background:#22c55e; box-shadow:0 0 8px #22c55e; }
+  .dot.warn { background:#f59e0b; box-shadow:0 0 8px #f59e0b; }
+  .dot.err { background:#ef4444; box-shadow:0 0 8px #ef4444; }
+  .dot.off { background:#64748b; }
+  /* Reloj grande, legible de lejos */
+  .reloj-espera { font-variant-numeric: tabular-nums; font-weight:800; letter-spacing:.02em; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- ============================ CABECERA ============================ -->
+<header class="sticky top-0 z-20 bg-[#0e1727] border-b border-[#22304a] px-3 py-2.5 flex items-center gap-3">
+  <div class="flex items-center gap-2 shrink-0">
+    <span class="grid h-10 w-10 place-items-center rounded-xl bg-amber-500/15 ring-1 ring-amber-500/40">
+      <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 21c3.6 0 6-2.4 6-5.8 0-4.2-3.7-5.5-3.3-9.7 0 0-2.3 1.3-2.3 3.6 0-1-1.4-2.2-2.2-3.1C8.4 8.2 6 10.8 6 13.7c0 4.4 2.4 7.3 6 7.3Z"/>
+      </svg>
+    </span>
+    <div class="leading-tight">
+      <h1 class="font-extrabold text-lg sm:text-xl tracking-tight">Cocina</h1>
+      <p class="text-[11px] text-slate-400 -mt-0.5">Entre Panas</p>
+    </div>
+  </div>
+
+  <div class="flex-1"></div>
+
+  <div class="flex items-center gap-2 sm:gap-4">
+    <div class="text-right leading-tight">
+      <p class="text-[10px] uppercase tracking-wider text-slate-500">Pendientes</p>
+      <p id="contador" class="text-xl font-extrabold text-amber-400 tabular-nums">0</p>
+    </div>
+    <div class="text-right leading-tight hidden sm:block">
+      <p class="text-[10px] uppercase tracking-wider text-slate-500">Hora</p>
+      <p id="reloj" class="text-lg font-bold tabular-nums">--:--</p>
+    </div>
+    <button id="btnConfig" class="h-10 w-10 grid place-items-center rounded-xl bg-[#16223a] hover:bg-[#1d2c49] active:scale-95 transition" aria-label="Enlace con caja">
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round">
+        <circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.5-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 11a2 2 0 1 1 0 4Z"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- ======================= ESTADO DE CONEXIÓN ======================= -->
+<div id="barraEstado" class="px-3 py-1.5 text-[11px] flex items-center gap-2 bg-[#101a2c] border-b border-[#1c2740] text-slate-400">
+  <span id="dotEstado" class="dot off"></span>
+  <span id="textoEstado">Iniciando…</span>
+  <span class="flex-1"></span>
+  <span id="textoTopic" class="font-mono text-[10px] text-slate-500"></span>
+</div>
+
+<!-- ============================== TABLERO ============================== -->
+<main class="flex-1 p-2.5 sm:p-4">
+  <div id="tablero" class="grid gap-2.5 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"></div>
+
+  <div id="vacio" class="hidden text-center py-24">
+    <svg viewBox="0 0 24 24" class="h-16 w-16 mx-auto mb-3" fill="none" stroke="#33415c" stroke-width="1.4" stroke-linecap="round">
+      <path d="M12 21c3.6 0 6-2.4 6-5.8 0-4.2-3.7-5.5-3.3-9.7 0 0-2.3 1.3-2.3 3.6 0-1-1.4-2.2-2.2-3.1C8.4 8.2 6 10.8 6 13.7c0 4.4 2.4 7.3 6 7.3Z"/>
+    </svg>
+    <p class="text-xl font-bold text-slate-500">Sin comandas pendientes</p>
+    <p class="text-sm text-slate-600 mt-1">Aquí aparecen los pedidos en cuanto caja los envía.</p>
+  </div>
+</main>
+
+<!-- ====================== MODAL DE ENLACE (config) ====================== -->
+<div id="config" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/70" data-cerrar></div>
+  <div class="relative h-full flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-[#131c2e] border border-[#24314b] rounded-2xl p-5 text-slate-200">
+      <h2 class="font-bold text-lg mb-1">Enlace con caja</h2>
+      <p class="text-xs text-slate-400 mb-4">Para ver los pedidos de <b>otra tablet</b>, las dos deben tener el mismo código.</p>
+
+      <label class="block mb-1 text-xs font-semibold text-slate-400">Código de enlace</label>
+      <div class="flex gap-2 mb-3">
+        <input id="inputTopic" type="text" autocomplete="off" spellcheck="false"
+          class="flex-1 min-w-0 rounded-lg bg-[#0e1727] border border-[#2b3a58] px-3 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/60">
+        <button id="btnPegar" class="px-3 rounded-lg bg-[#1d2c49] hover:bg-[#26385c] text-xs font-bold">Pegar</button>
+      </div>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button id="btnGuardar" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-2.5 rounded-lg text-sm active:scale-95 transition">Conectar</button>
+        <button id="btnNuevo" class="px-3 bg-[#1d2c49] hover:bg-[#26385c] font-bold py-2.5 rounded-lg text-sm active:scale-95 transition">Crear nuevo</button>
+      </div>
+
+      <div class="text-[11px] text-slate-500 bg-[#0e1727] rounded-lg p-3 leading-relaxed">
+        <b class="text-slate-400">Cómo hacerlo:</b><br>
+        1. En <b>caja</b> entra a la pestaña <b>Cocina → Vincular pantalla</b>.<br>
+        2. Copia ahí el enlace y ábrelo en esta pantalla (o escribe el código arriba).
+      </div>
+
+      <button data-cerrar class="mt-4 w-full bg-white/5 hover:bg-white/10 text-slate-300 font-bold py-2.5 rounded-lg text-sm">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Aviso de comanda nueva -->
+<div id="aviso" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 hidden bg-amber-500 text-slate-900 font-extrabold px-5 py-3 rounded-xl shadow-2xl"></div>
+
+<script src="sync.js"></script>
+<script src="cocina.js"></script>
+</body>
+</html>
