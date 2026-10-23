@@ -1,12 +1,15 @@
 /* Service worker: cache-first para que el POS abra sin internet. */
-const CACHE = 'entre-panas-v3';
+const CACHE = 'entre-panas-v4';
 const ARCHIVOS = [
   './',
   'index.html',
   'app.js',
   'assets/estilos.css',
   'assets/icono.svg',
-  'manifest.webmanifest'
+  'manifest.webmanifest',
+  'sync.js',
+  'cocina.html',
+  'cocina.js'
 ];
 
 self.addEventListener('install', e => {
