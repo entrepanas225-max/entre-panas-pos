@@ -1,0 +1,15 @@
+{
+  "name": "Cocina · Entre Panas",
+  "short_name": "Cocina",
+  "description": "Pantalla de comandas en vivo para la cocina de Entre Panas.",
+  "lang": "es-CO",
+  "start_url": "./cocina.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "icons": [
+    { "src": "assets/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
