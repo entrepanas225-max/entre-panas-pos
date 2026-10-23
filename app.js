@@ -162,8 +162,12 @@
     return s;
   }
 
+  let contadorUid = 0;
+  const nuevoUid = () => 'u' + Date.now().toString(36).slice(-5) + (contadorUid++).toString(36);
+
   function limpiarItem(i) {
     return {
+      uid: i.uid || nuevoUid(),
       prodId: i.prodId ?? null,
       nombre: String(i.nombre || 'Producto'),
       precio: Math.max(0, Number(i.precio) || 0),
@@ -208,6 +212,59 @@
       }
     }, 120);
     render();
+    publicarCocina();
+  }
+
+  /* --------------------------------------------------- enlace con cocina */
+  /** Estado que necesita la cocina: solo lo enviado y no listo. */
+  function resumenCocina() {
+    const ordenes = [];
+    estado.mesas.forEach(m => {
+      const items = m.items.filter(i => i.enviado && !i.listo);
+      if (items.length) ordenes.push({
+        k: 'm' + m.id, titulo: 'Mesa ' + m.id,
+        items: items.map(i => ({ u: i.uid, n: i.nombre, c: i.cant, e: i.enviadoEn, nota: i.nota || '' }))
+      });
+    });
+    estado.domicilios.forEach(d => {
+      const items = d.items.filter(i => i.enviado && !i.listo);
+      if (items.length) ordenes.push({
+        k: 'd' + d.id, titulo: d.cliente, nota: d.direccion || '',
+        items: items.map(i => ({ u: i.uid, n: i.nombre, c: i.cant, e: i.enviadoEn, nota: i.nota || '' }))
+      });
+    });
+    return ordenes;
+  }
+
+  function publicarCocina() {
+    if (!window.Sync || !window.Sync.topic) return;
+    window.Sync.publicar({ t: 'estado', ordenes: resumenCocina() });
+  }
+
+  /** La cocina marcó platos como listos. */
+  function aplicarListoDesdeCocina(uids) {
+    if (!Array.isArray(uids) || !uids.length) return;
+    let cambios = 0;
+    const marcar = (items) => items.forEach(i => {
+      if (uids.includes(i.uid) && !i.listo) { i.listo = true; cambios++; }
+    });
+    estado.mesas.forEach(m => marcar(m.items));
+    estado.domicilios.forEach(d => marcar(d.items));
+    if (cambios) {
+      guardar();                       // guardar ya republica el estado
+      toast(cambios === 1 ? 'Cocina marcó un plato listo' : `Cocina marcó ${cambios} platos listos`, 'ok');
+      if (modal && modal.tipo === 'orden') pintarModal();
+    }
+  }
+
+  function iniciarEnlace() {
+    if (!window.Sync) return;
+    window.Sync.init();
+    window.Sync.escuchar((msg) => {
+      if (msg.t === 'listo') aplicarListoDesdeCocina(msg.u);
+      if (msg.t === 'hola') publicarCocina();     // la cocina pide el estado
+    });
+    if (window.Sync.topic) publicarCocina();
   }
 
   /* --------------------------------------------------------------- orden */
@@ -426,6 +483,19 @@
       </div>`;
 
     $('#resumenCocina').textContent = totalPendientes ? `${totalPendientes} plato(s) pendientes` : '';
+
+    // estado del enlace con la pantalla de cocina
+    const dot = $('#dotEnlace'), txt = $('#txtEnlace'), sub = $('#subEnlace');
+    if (dot && window.Sync) {
+      const e = window.Sync.estado, tema = window.Sync.topic;
+      dot.className = 'h-2 w-2 rounded-full ' + (
+        e === 'en-linea' ? 'bg-emerald-500' : e === 'conectando' ? 'bg-amber-400' :
+        e === 'error' ? 'bg-red-500' : 'bg-slate-300');
+      txt.textContent = tema
+        ? (e === 'en-linea' ? 'Cocina enlazada' : 'Conectando cocina…')
+        : 'Pantalla de cocina';
+      sub.textContent = tema ? 'Código: ' + tema : 'Abre la vista para el cocinero o vincula otra tablet.';
+    }
 
     const badge = $('#cocinaBadge');
     badge.textContent = totalPendientes;
@@ -875,6 +945,42 @@
     };
   };
 
+  /* --- 6b. Vincular pantalla de cocina --- */
+  vistas.vincular = function () {
+    const tema = (window.Sync && window.Sync.topic) || '';
+    const url = window.Sync ? window.Sync.urlCocina() : 'cocina.html';
+    return {
+      titulo: 'Vincular pantalla de cocina',
+      cuerpo: `
+        <p class="text-xs text-slate-500 mb-3">
+          Comparte este código entre la caja y la cocina para que vean lo mismo en tiempo real.
+          Si la cocina está en la <b>misma tablet</b>, no necesitas nada: funciona sola.
+        </p>
+
+        <label class="block mb-1 text-xs font-semibold text-slate-600">Código de enlace</label>
+        <div class="flex gap-2 mb-3">
+          <input id="inputEnlace" type="text" value="${esc(tema)}" autocomplete="off" spellcheck="false"
+            placeholder="sin enlace"
+            class="flex-1 min-w-0 rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-red-400">
+          <button data-accion="generar-enlace" class="px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-600">Nuevo</button>
+        </div>
+
+        <p class="text-xs font-semibold text-slate-600 mb-1">Enlace para abrir en la cocina</p>
+        <div class="flex gap-2 mb-3">
+          <input id="urlCocina" type="text" readonly value="${esc(url)}"
+            class="flex-1 min-w-0 rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-[11px] text-slate-500">
+          <button data-accion="copiar-enlace" class="px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-600">Copiar</button>
+        </div>
+
+        <div id="estadoEnlace" class="text-[11px] rounded-lg p-2.5 ${estado.turno.abierto ? '' : ''} bg-slate-50 text-slate-500"></div>`,
+      pie: `
+        <div class="grid grid-cols-2 gap-2">
+          <button data-accion="cerrar-modal" class="bg-white ring-1 ring-slate-300 text-slate-600 font-bold py-2.5 rounded-lg text-sm">Cerrar</button>
+          <button data-accion="guardar-enlace" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-sm active:scale-[.98]">Conectar</button>
+        </div>`
+    };
+  };
+
   /* --- 7. Confirmación --- */
   vistas.confirmar = function () {
     const { mensaje, detalle, textoOk = 'Confirmar', peligro = true } = modal.datos;
@@ -922,7 +1028,7 @@
 
     if (linea) linea.cant++;
     else orden.items.push({
-      prodId: prod.id, nombre, precio, nota,
+      uid: nuevoUid(), prodId: prod.id, nombre, precio, nota,
       cant: 1, enviado: false, listo: false, enviadoEn: null
     });
 
@@ -1022,6 +1128,44 @@
       case 'agregar':
         agregarProducto(btn.dataset.prod);
         break;
+
+      case 'abrir-cocina':
+        window.open(window.Sync ? window.Sync.urlCocina() : 'cocina.html', '_blank', 'noopener');
+        break;
+
+      case 'vincular':
+        abrirModal('vincular');
+        break;
+
+      case 'generar-enlace': {
+        const t = window.Sync ? window.Sync.nuevoTopic() : '';
+        const inp = document.getElementById('inputEnlace');
+        if (inp) inp.value = t;
+        const u = document.getElementById('urlCocina');
+        if (u) u.value = window.Sync ? window.Sync.urlCocina() : '';
+        publicarCocina();
+        toast('Código creado: conéctalo en la cocina', 'ok');
+        break;
+      }
+
+      case 'copiar-enlace': {
+        const campo = document.getElementById('urlCocina');
+        if (!campo) break;
+        campo.select();
+        navigator.clipboard?.writeText(campo.value).then(
+          () => toast('Enlace copiado', 'ok'),
+          () => toast('Copia manualmente el enlace', 'info'));
+        break;
+      }
+
+      case 'guardar-enlace': {
+        const inp = document.getElementById('inputEnlace');
+        const t = window.Sync ? window.Sync.guardarTopic(inp ? inp.value : '') : '';
+        publicarCocina();
+        cerrarModal();
+        toast(t ? 'Enlace activo: ' + t : 'Enlace desactivado', t ? 'ok' : 'info');
+        break;
+      }
 
       case 'categoria':
         modal.datos.cat = btn.dataset.cat;
@@ -1252,5 +1396,6 @@
   /* Arranque */
   irATab('mesas');
   render();
+  iniciarEnlace();
 
 })();
